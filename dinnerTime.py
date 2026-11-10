@@ -15,8 +15,9 @@ Run from the Maya Script Editor (Python tab):
     dinnerTime.show()
 
 After editing this file, run the commands again to reload the tool.
-Click "Pull Windows to This Position" to move visible Maya windows,
-except Maya's main window, to the position of this tool window.
+Use "Pull Windows to This Position" to align visible Maya windows with
+this tool window, or "Move Windows to This Screen's Top-Left" to align
+them with the top-left corner of the screen containing this tool.
 """
 
 try:
@@ -50,12 +51,26 @@ class PullWindowsDialog(QtWidgets.QDialog):
         self.setAttribute(QtCore.Qt.WidgetAttribute.WA_DeleteOnClose, False)
 
         layout = QtWidgets.QVBoxLayout(self)
-        button = QtWidgets.QPushButton("Pull Windows to This Position")
-        button.clicked.connect(self.pull_windows)
-        layout.addWidget(button)
+        pull_button = QtWidgets.QPushButton("Pull Windows to This Position")
+        pull_button.clicked.connect(self.pull_windows)
+        layout.addWidget(pull_button)
+
+        top_left_button = QtWidgets.QPushButton(
+            "Move Windows to This Screen's Top-Left"
+        )
+        top_left_button.clicked.connect(self.move_windows_to_screen_top_left)
+        layout.addWidget(top_left_button)
 
     def pull_windows(self):
-        target = self.frameGeometry().topLeft()
+        self._move_windows_to(self.frameGeometry().topLeft())
+
+    def move_windows_to_screen_top_left(self):
+        screen = self.screen()
+        if screen is None:
+            raise RuntimeError("Could not determine which screen contains this tool.")
+        self._move_windows_to(screen.geometry().topLeft())
+
+    def _move_windows_to(self, target):
         main_window_pointer = _maya_main_window_pointer()
         tool_window_pointer = shiboken.getCppPointer(self)[0]
         app = QtWidgets.QApplication.instance()
