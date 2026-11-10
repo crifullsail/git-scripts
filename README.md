@@ -10,5 +10,12 @@ import sys
 
 script_folder = r"D:\OneDrive - Full Sail University\CGA-3312\rigging_tools\git-scripts"
 
+# I am including an addition variable to input the path for my home computer.
+script_folder = r""
+
 if script_folder not in sys.path:
     sys.path.insert(0, script_folder)
+
+
+
+
